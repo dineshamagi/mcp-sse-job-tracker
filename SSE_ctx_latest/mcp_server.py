@@ -21,7 +21,7 @@ mcp = FastMCP("Background task server")
 async def submit_job(ctx: Context, job_name: str) -> str:
     job_id = str(uuid.uuid4())
     await ctx.info(f"Received Job {job_name} with ID {job_id}")
-    asyncio.create_task(process_job(ctx, job_id, job_name))
+    await asyncio.create_task(process_job(ctx, job_id, job_name))
     return job_id
 
 async def process_job(ctx: Context, job_id: str, job_name: str):
