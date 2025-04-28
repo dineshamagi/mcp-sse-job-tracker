@@ -33,13 +33,28 @@ async def run():
 
             #List available tools 
             tools = await session.list_tools()
+            print("===================================================")
             print(tools)
-
+            print("==================================================")
             #Call the 'submit_job' tool
             job_name = "Example_job"
             response = await session.call_tool("submit_job",{"job_name":job_name})
             job_id = response.content
             print(f"Submitted job '{job_name}' with ID: {job_id}")
+
+            #POll the server for job status every 1 second 
+            
+            while True:
+                status_response = await session.call_tool("get_job_status",{"job_id":job_id})
+                status = status_response.content
+                print(f"Job status: {status}")
+
+                if status != "Job pending":
+                    print("===================Job Completed============================")
+                    break
+
+                await asyncio.sleep(1) #wait before polling again
+
 
 
             
