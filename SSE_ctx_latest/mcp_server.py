@@ -2,8 +2,10 @@ from mcp.server.fastmcp import FastMCP, Context
 import logging
 import uuid
 import asyncio
+from fastapi import FastAPI
 
 
+app = FastAPI()  # main app
 
 # Setup logging
 logging.basicConfig(
@@ -12,11 +14,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("mcp_server")
 
-
 #create an MCP server 
-mcp = FastMCP("Background task server")
-job_results = {}
+mcp = FastMCP("Background task server") #sub - application 
 
+job_results = {}
 
 
 @mcp.tool()               # Tool returns a job ID and immediately responds 
@@ -37,6 +38,11 @@ async def process_job(ctx: Context, job_id: str, job_name: str):
 def get_job_status(job_id: str) -> str:
     return job_results.get(job_id,"Job pending")
 
-if __name__ == "__main__":
-    mcp.run(transport="sse")
+# Mount the MCP server as a subapp at /mcp
+app.mount("/", mcp.sse_app())
 
+if __name__ == "__main__":
+    import uvicorn
+    # You can customize host, port, reload, etc. as needed
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+#  app.mount("/",mcp.sse_app())
